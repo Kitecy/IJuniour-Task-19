@@ -1,13 +1,15 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(UnitMovement), typeof(Collector))]
 public class Unit : MonoBehaviour
 {
-    [SerializeField] private Base _base;
-
     private Collector _collector;
     private UnitMovement _movement;
-    [SerializeField] private Resource _targetResource;
+    private Resource _targetResource;
+
+    public event Action<Unit> ReachedResource;
+    public event Action<Unit> ReachedBase;
 
     public bool IsBusy => _collector.IsBusy;
 
@@ -22,17 +24,19 @@ public class Unit : MonoBehaviour
         _targetResource = resource;
 
         MoveTo(resource.ArrivalPoint);
-        _movement.Reached += OnReached;
+        _movement.Reached += OnReachedResource;
     }
 
-    private void OnReached()
+    public void GoToBase(Transform @base)
     {
-        _movement.Reached -= OnReached;
-
-        _collector.Take(_targetResource);
-
-        MoveTo(_base.ArrivalPoint);
+        MoveTo(@base);
         _movement.Reached += OnReachedBase;
+    }
+
+    public Resource GiveResource()
+    {
+        _targetResource = null;
+        return _collector.GiveResource();
     }
 
     private void MoveTo(Transform target)
@@ -41,9 +45,18 @@ public class Unit : MonoBehaviour
         _movement.Move();
     }
 
+    private void OnReachedResource()
+    {
+        _movement.Reached -= OnReachedResource;
+
+        _collector.Take(_targetResource);
+
+        ReachedResource?.Invoke(this);
+    }
+
     private void OnReachedBase()
     {
         _movement.Reached -= OnReachedBase;
-        _collector.Put(_base, this);
+        ReachedBase?.Invoke(this);
     }
 }

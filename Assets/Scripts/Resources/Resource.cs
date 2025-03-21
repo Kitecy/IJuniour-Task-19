@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Resource : MonoBehaviour, IHasArrivalPoint
+public class Resource : MonoBehaviour
 {
     public event Action Claimed;
 

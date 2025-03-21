@@ -1022,6 +1022,10 @@ PrefabInstance:
       propertyPath: '_places.Array.data[2]'
       value: 
       objectReference: {fileID: 2117347780}
+    - target: {fileID: 6313634480979507291, guid: 56b6ca16d0be61740bf80c99d2ecfca0, type: 3}
+      propertyPath: m_text
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7353872189970428759, guid: 56b6ca16d0be61740bf80c99d2ecfca0, type: 3}
       propertyPath: m_LocalPosition.x
       value: -17.393

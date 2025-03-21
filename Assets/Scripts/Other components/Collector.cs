@@ -12,7 +12,7 @@ public class Collector : MonoBehaviour
 
     public void Take(Resource resource)
     {
-        bool distancePassed = _distanceChecker.CheckDistance(transform.position, resource.transform.position, _maxTakeDistance);
+        bool distancePassed = _distanceChecker.IsDistanceGreater(transform.position, resource.transform.position, _maxTakeDistance);
 
         if (distancePassed == false || IsBusy)
             return;
@@ -24,11 +24,11 @@ public class Collector : MonoBehaviour
         _resource.Claim();
     }
 
-    public void Put(Base @base, Unit unit)
+    public Resource GiveResource()
     {
-        @base.ClaimResource(_resource, unit);
-
+        Resource temp = _resource;
         _resource.transform.SetParent(null);
         _resource = null;
+        return temp;
     }
 }

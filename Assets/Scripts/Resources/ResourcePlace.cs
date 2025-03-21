@@ -24,12 +24,11 @@ public class ResourcePlace : MonoBehaviour
     private void Start()
     {
         Spawn();
-        StartCoroutine(Spawning());
     }
 
     public void Spawn()
     {
-        if (Resource != null)
+        if (HaveResource)
             return;
 
         Resource = _spawner.GetObject();
@@ -41,16 +40,14 @@ public class ResourcePlace : MonoBehaviour
 
     private IEnumerator Spawning()
     {
-        while (_isSpawning)
-        {
-            yield return _sleepTime;
-            Spawn();
-        }
+        yield return _sleepTime;
+        Spawn();
     }
 
     private void OnResourceClaimed()
     {
         Resource.Claimed -= OnResourceClaimed;
+        StartCoroutine(Spawning());
         Resource = null;
     }
 }

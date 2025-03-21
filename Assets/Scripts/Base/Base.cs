@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Base : MonoBehaviour, IHasArrivalPoint
+public class Base : MonoBehaviour
 {
     [SerializeField] private List<Unit> _units;
     [SerializeField] private List<ResourcePlace> _places;
@@ -12,29 +13,49 @@ public class Base : MonoBehaviour, IHasArrivalPoint
 
     private int _resources;
 
+    public event Action<int> ResourcesChanged;
+
     [field: SerializeField] public Transform ArrivalPoint { get; private set; }
 
     private void OnEnable()
     {
         foreach (ResourcePlace place in _places)
             place.Spawned += OnResourceSpawned;
+
+        foreach (Unit unit in _units)
+        {
+            unit.ReachedResource += OnUnitReachedResource;
+            unit.ReachedBase += OnUnitReachedBase;
+        }
     }
 
     private void OnDisable()
     {
         foreach (ResourcePlace place in _places)
             place.Spawned -= OnResourceSpawned;
+
+        foreach (Unit unit in _units)
+        {
+            unit.ReachedResource -= OnUnitReachedResource;
+            unit.ReachedBase -= OnUnitReachedBase;
+        }
     }
 
-    public void ClaimResource(Resource resource, Unit unit)
+    private void OnUnitReachedResource(Unit unit)
     {
-        _units.Add(unit);
+        unit.GoToBase(ArrivalPoint);
+    }
+
+    private void OnUnitReachedBase(Unit unit)
+    {
+        _spawner.ReleaseObject(unit.GiveResource());
 
         _resources++;
-        _spawner.ReleaseObject(resource);
+        ResourcesChanged?.Invoke(_resources);
 
-        if (_waitingList.Count != 0)
-            SendForResourceFromWaitingList();
+        _units.Add(unit);
+
+        SendForResourceFromWaitingList();
     }
 
     private void OnResourceSpawned(Resource resource)
