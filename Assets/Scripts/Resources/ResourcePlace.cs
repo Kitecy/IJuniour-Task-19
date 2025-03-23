@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 
@@ -8,10 +7,7 @@ public class ResourcePlace : MonoBehaviour
     [SerializeField] private Transform _spawnPosition;
     [SerializeField] private ResourceSpawner _spawner;
 
-    private bool _isSpawning = true;
     private WaitForSeconds _sleepTime;
-
-    public event Action<Resource> Spawned;
 
     public Resource Resource { get; private set; }
     public bool HaveResource => Resource != null;
@@ -19,10 +15,6 @@ public class ResourcePlace : MonoBehaviour
     private void Awake()
     {
         _sleepTime = new(_spawnDelay);
-    }
-
-    private void Start()
-    {
         Spawn();
     }
 
@@ -34,8 +26,6 @@ public class ResourcePlace : MonoBehaviour
         Resource = _spawner.GetObject();
         Resource.transform.position = _spawnPosition.position;
         Resource.Claimed += OnResourceClaimed;
-
-        Spawned?.Invoke(Resource);
     }
 
     private IEnumerator Spawning()

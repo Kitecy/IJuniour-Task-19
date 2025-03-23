@@ -6,10 +6,9 @@ using UnityEngine;
 public class Base : MonoBehaviour
 {
     [SerializeField] private List<Unit> _units;
-    [SerializeField] private List<ResourcePlace> _places;
     [SerializeField] private ResourceSpawner _spawner;
-
-    private readonly List<Resource> _waitingList = new();
+    [SerializeField] private ResourceScanner _scanner;
+    [SerializeField] private ResourcesQueue _resourceQueue;
 
     private int _resources;
 
@@ -17,11 +16,13 @@ public class Base : MonoBehaviour
 
     [field: SerializeField] public Transform ArrivalPoint { get; private set; }
 
+    private void Awake()
+    {
+        _scanner.Scanned += OnResourcesScanned;
+    }
+
     private void OnEnable()
     {
-        foreach (ResourcePlace place in _places)
-            place.Spawned += OnResourceSpawned;
-
         foreach (Unit unit in _units)
         {
             unit.ReachedResource += OnUnitReachedResource;
@@ -31,14 +32,21 @@ public class Base : MonoBehaviour
 
     private void OnDisable()
     {
-        foreach (ResourcePlace place in _places)
-            place.Spawned -= OnResourceSpawned;
-
         foreach (Unit unit in _units)
         {
             unit.ReachedResource -= OnUnitReachedResource;
             unit.ReachedBase -= OnUnitReachedBase;
         }
+    }
+
+    private void OnResourcesScanned(List<Resource> resources)
+    {
+        if (resources.Count == 0 || _units.Count == 0)
+            return;
+
+        for (int i = 0; i < resources.Count && _units.Count > 0; i++)
+            if (_resourceQueue.TryAddResource(resources[i]))
+                SendForResource(resources[i]);
     }
 
     private void OnUnitReachedResource(Unit unit)
@@ -48,25 +56,14 @@ public class Base : MonoBehaviour
 
     private void OnUnitReachedBase(Unit unit)
     {
-        _spawner.ReleaseObject(unit.GiveResource());
+        Resource collectedResource = unit.GiveResource();
+        _spawner.ReleaseObject(collectedResource);
+        _resourceQueue.RemoveResource(collectedResource);
 
         _resources++;
         ResourcesChanged?.Invoke(_resources);
 
         _units.Add(unit);
-
-        SendForResourceFromWaitingList();
-    }
-
-    private void OnResourceSpawned(Resource resource)
-    {
-        if (_units.Count == 0)
-        {
-            _waitingList.Add(resource);
-            return;
-        }
-
-        SendForResource(resource);
     }
 
     private void SendForResource(Resource resource)
@@ -75,16 +72,5 @@ public class Base : MonoBehaviour
         _units.Remove(unit);
 
         unit.GoToResources(resource);
-    }
-
-    private void SendForResourceFromWaitingList()
-    {
-        if (_units.Count == 0 || _waitingList.Count == 0)
-            return;
-
-        Resource resource = _waitingList.First();
-        _waitingList.Remove(resource);
-
-        SendForResource(resource);
     }
 }

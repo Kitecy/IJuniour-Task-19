@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8971055222376918524}
   - component: {fileID: 5370009828892570157}
   - component: {fileID: -3903482744897083120}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Resource
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -132,7 +132,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 12838791410534863}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: ArrivalPoint
   m_TagString: Untagged
   m_Icon: {fileID: 3936346786652291628, guid: 0000000000000000d000000000000000, type: 0}
